@@ -1,0 +1,36 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OpenClaw runtime
+openclaw-agent/config/
+openclaw-agent/config-backup*/
+openclaw-agent/workspace/
+openclaw-agent/.env
+
+# Database (generated at runtime)
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Claude
+.claude/

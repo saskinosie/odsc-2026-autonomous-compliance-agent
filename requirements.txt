@@ -1,0 +1,5 @@
+contextual-client
+python-dotenv
+requests
+openai
+opik

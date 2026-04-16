@@ -1,0 +1,52 @@
+services:
+  openclaw-gateway:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
+    ports:
+      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "18790:18790"
+    environment:
+      - TZ=${TZ:-UTC}
+      - OPENCLAW_AUTH_TOKEN=${OPENCLAW_AUTH_TOKEN:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+      - OPIK_API_KEY=${OPIK_API_KEY:-}
+      - OPIK_PROJECT_NAME=compliance-agent
+      - OPIK_WORKSPACE=${OPIK_WORKSPACE:-}
+    volumes:
+      - ./config:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE:-./workspace}:/home/user/workspace
+      - ./skills/brave-search:/app/skills/brave-search
+      - ./skills/check-compliance-updates:/app/skills/check-compliance-updates
+      - ../data:/home/user/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18789/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  openclaw-cli:
+    image: ${OPENCLAW_IMAGE:-ghcr.io/openclaw/openclaw:latest}
+    network_mode: "service:openclaw-gateway"
+    environment:
+      - TZ=${TZ:-UTC}
+      - OPENCLAW_AUTH_TOKEN=${OPENCLAW_AUTH_TOKEN:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+    volumes:
+      - ./config:/home/node/.openclaw
+      - ${OPENCLAW_WORKSPACE:-./workspace}:/home/user/workspace
+      - ./skills/brave-search:/app/skills/brave-search
+      - ./skills/check-compliance-updates:/app/skills/check-compliance-updates
+      - ../data:/home/user/data
+    depends_on:
+      openclaw-gateway:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    profiles:
+      - cli
