@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ODSC 2026 Workshop — Prerequisites Handout</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #1a1a1a;
+      padding: 32px 40px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 3px solid #1a1a1a;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 4px;
+      margin: 24px 0 12px;
+    }
+
+    h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 14px 0 6px;
+    }
+
+    p { margin-bottom: 8px; }
+
+    ul {
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+
+    ul li { margin-bottom: 4px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 12.5px;
+    }
+
+    th {
+      background: #f2f2f2;
+      text-align: left;
+      padding: 6px 10px;
+      font-weight: 600;
+      border: 1px solid #ddd;
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      vertical-align: top;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-provided {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-free {
+      background: #e2f0fb;
+      color: #0c4a6e;
+    }
+
+    .badge-optional {
+      background: #f5f5f5;
+      color: #555;
+    }
+
+    .callout {
+      background: #fffbea;
+      border-left: 4px solid #f59e0b;
+      padding: 10px 14px;
+      margin: 16px 0;
+      font-size: 12.5px;
+    }
+
+    .callout strong { font-weight: 700; }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      min-width: 22px;
+      height: 22px;
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 11.5px;
+      background: #f4f4f4;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    footer {
+      margin-top: 32px;
+      padding-top: 12px;
+      border-top: 1px solid #ddd;
+      font-size: 11px;
+      color: #777;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media print {
+      body { padding: 20px 28px; }
+      @page { margin: 0.5in; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Deploying a Secure Autonomous Agent</h1>
+    <p>ODSC 2026 &nbsp;·&nbsp; Hands-On Workshop &nbsp;·&nbsp; Please download/install before the session</p>
+  </header>
+
+  <div class="callout">
+    <strong>Wi-Fi tip:</strong> Download installers and save account pages as PDFs before you arrive. The workshop notebooks run locally — you only need internet access for initial API calls.
+  </div>
+
+  <!-- SECTION 1: SOFTWARE -->
+  <h2>1 &nbsp; Software to Install</h2>
+
+  <div class="two-col">
+    <div>
+      <h3>Docker Desktop <span style="font-weight:400;color:#555;">(required)</span></h3>
+      <p>Runs both agents in isolated containers.</p>
+      <ul>
+        <li>Mac (Apple Silicon): Docker Desktop dmg</li>
+        <li>Mac (Intel): Docker Desktop dmg</li>
+        <li>Windows: Docker Desktop exe</li>
+        <li>Linux: Docker Engine + Compose plugin</li>
+      </ul>
+      <p><strong>Download:</strong> docker.com/products/docker-desktop</p>
+    </div>
+
+    <div>
+      <h3>Python 3.10+ <span style="font-weight:400;color:#555;">(required)</span></h3>
+      <p>Most attendees will already have this.</p>
+      <ul>
+        <li>Mac: use Homebrew — <code>brew install python</code></li>
+        <li>Windows / Linux: python.org/downloads</li>
+      </ul>
+      <p>Verify: <code>python --version</code></p>
+
+      <h3 style="margin-top:14px;">Git <span style="font-weight:400;color:#555;">(required)</span></h3>
+      <p><strong>Download:</strong> git-scm.com/downloads</p>
+    </div>
+  </div>
+
+  <!-- SECTION 2: ACCOUNTS -->
+  <h2>2 &nbsp; Accounts &amp; API Keys</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Purpose</th>
+        <th>Cost</th>
+        <th>Sign-up URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>OpenAI</strong></td>
+        <td>Powers agent reasoning</td>
+        <td><span class="badge badge-provided">Provided at workshop</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Brave Search API</strong></td>
+        <td>Web search skill for finding compliance pages</td>
+        <td><span class="badge badge-free">Free (2,000 req/mo)</span></td>
+        <td>brave.com/search/api</td>
+      </tr>
+      <tr>
+        <td><strong>Telegram</strong></td>
+        <td>Receive live compliance alerts on your phone</td>
+        <td><span class="badge badge-free">Free</span></td>
+        <td>telegram.org</td>
+      </tr>
+      <tr>
+        <td><strong>Opik (Comet)</strong></td>
+        <td>Agent observability &amp; tracing</td>
+        <td><span class="badge badge-optional">Optional — Free</span></td>
+        <td>comet.com/opik</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Do before the workshop:</strong> Sign up for Brave Search and Telegram. Copy your API keys somewhere accessible (notes app, printed sheet). The OpenAI key will be handed out at the start of the session.
+  </div>
+
+  <!-- SECTION 3: TELEGRAM SETUP -->
+  <h2>3 &nbsp; Telegram Bot Setup <span style="font-weight:400;text-transform:none;font-size:12px;">(5 min — do this before arriving)</span></h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div>Open Telegram and search for <strong>@BotFather</strong>. Send <code>/newbot</code>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div>Choose a display name (e.g. <em>Compliance Alert Bot</em>) and a username ending in <code>bot</code>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div>BotFather replies with your <strong>HTTP API token</strong> — save it.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div>Send your bot any message (e.g. "hello"), then open:<br/>
+      <code>https://api.telegram.org/bot&lt;YOUR_TOKEN&gt;/getUpdates</code><br/>
+      Find <code>"chat":{"id": 123456789}</code> — that number is your <strong>chat ID</strong>.
+    </div>
+  </div>
+
+  <!-- SECTION 4: REPO SETUP -->
+  <h2>4 &nbsp; Get the Repo Ready</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div><strong>Clone:</strong> <code>git clone https://github.com/saskinosie/odsc-2026-autonomous-compliance-agent.git</code></div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div><strong>Virtual env:</strong> <code>python -m venv .venv &amp;&amp; source .venv/bin/activate</code> &nbsp;(Windows: <code>.venv\Scripts\activate</code>)</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div><strong>Dependencies:</strong> <code>pip install -r requirements.txt</code></div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div><strong>Docker pull (saves time on-site):</strong> <code>docker compose -f custom-claw/docker-compose.yml pull</code></div>
+  </div>
+
+  <!-- SECTION 5: OFFLINE REFERENCE DOCS -->
+  <h2>5 &nbsp; Offline Reference Docs to Save as PDF</h2>
+
+  <table>
+    <thead>
+      <tr><th>Document</th><th>URL</th><th>Why you need it offline</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Docker Desktop Install Guide</td>
+        <td>docs.docker.com/desktop</td>
+        <td>Troubleshooting install issues</td>
+      </tr>
+      <tr>
+        <td>Brave Search API Docs</td>
+        <td>brave.com/search/api</td>
+        <td>API key setup &amp; rate limits</td>
+      </tr>
+      <tr>
+        <td>Opik Quickstart</td>
+        <td>comet.com/docs/opik</td>
+        <td>Observability setup in Part 5</td>
+      </tr>
+      <tr>
+        <td>ETS Praxis State Requirements</td>
+        <td>ets.org/praxis/states.html</td>
+        <td>Domain context for the agent</td>
+      </tr>
+      <tr>
+        <td>Workshop README</td>
+        <td><em>Included in the repo</em></td>
+        <td>Full architecture &amp; commands reference</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 6: KEY TERMS -->
+  <h2>6 &nbsp; Key Terms Cheat Sheet</h2>
+
+  <table>
+    <thead>
+      <tr><th>Term</th><th>What it is</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Custom Claw</strong></td><td>~150-line Python script you build yourself. Fetches pages, hashes content, diffs against SQLite snapshots, fires Telegram alerts.</td></tr>
+      <tr><td><strong>OpenClaw</strong></td><td>Agent framework running in Docker. Same logic as Custom Claw but with scheduling, a web dashboard, and 50+ built-in skills.</td></tr>
+      <tr><td><strong>Opik</strong></td><td>Observability platform — captures every agent turn as a trace so you can inspect inputs, outputs, and latency.</td></tr>
+      <tr><td><strong>Praxis</strong></td><td>ETS standardized exams required for teacher licensure across most US states.</td></tr>
+      <tr><td><strong>NASDTEC</strong></td><td>Organization managing interstate teacher certification agreements.</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    <span>ODSC 2026 &nbsp;·&nbsp; Deploying a Secure Autonomous Agent</span>
+    <span>github.com/saskinosie/odsc-2026-autonomous-compliance-agent</span>
+  </footer>
+
+</body>
+</html>
