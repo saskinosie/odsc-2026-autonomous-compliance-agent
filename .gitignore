@@ -34,3 +34,5 @@ data/*.db-wal
 
 # Claude
 .claude/
+
+CLAUDE.md
