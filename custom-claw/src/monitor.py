@@ -11,6 +11,7 @@ What it does:
 """
 
 import hashlib
+import html as html_lib
 import os
 import re
 import sqlite3
@@ -25,8 +26,8 @@ from compliance_urls import WATCH_LIST
 load_dotenv()
 
 DB_PATH    = os.getenv("DB_PATH", "/data/compliance.db")
-BOT_TOKEN  = os.getenv("TELEGRAM_BOT_TOKEN", "")
-CHAT_ID    = os.getenv("TELEGRAM_CHAT_ID", "")
+BOT_TOKEN  = os.getenv("CUSTOM_CLAW_TELEGRAM_BOT_TOKEN", "")
+CHAT_ID    = os.getenv("CUSTOM_CLAW_TELEGRAM_CHAT_ID", "")
 USER_AGENT = "Mozilla/5.0 (compatible; compliance-monitor/1.0)"
 FETCH_TIMEOUT = 20  # seconds
 
@@ -34,7 +35,9 @@ FETCH_TIMEOUT = 20  # seconds
 # ── Database ──────────────────────────────────────────────────────────────────
 
 def init_db(db_path: str) -> sqlite3.Connection:
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    db_dir = os.path.dirname(db_path)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS snapshots (
@@ -63,10 +66,11 @@ def init_db(db_path: str) -> sqlite3.Connection:
     return conn
 
 
-def get_last_hash(conn: sqlite3.Connection, url: str) -> str | None:
+def get_last_hash(conn: sqlite3.Connection, url: str, state: str, subject: str) -> str | None:
     row = conn.execute(
-        "SELECT content_hash FROM snapshots WHERE url = ? ORDER BY checked_at DESC LIMIT 1",
-        (url,)
+        "SELECT content_hash FROM snapshots WHERE url = ? AND state = ? AND subject = ? "
+        "ORDER BY checked_at DESC LIMIT 1",
+        (url, state, subject)
     ).fetchone()
     return row[0] if row else None
 
@@ -98,9 +102,12 @@ def fetch_text(url: str) -> str | None:
     try:
         resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=FETCH_TIMEOUT)
         resp.raise_for_status()
-        html = resp.text
-        # Strip tags, collapse whitespace
-        text = re.sub(r"<[^>]+>", " ", html)
+        raw = resp.text
+        # Remove script/style blocks before stripping tags to avoid hashing
+        # dynamic JS payloads, nonces, or analytics that change on every load.
+        raw = re.sub(r"<(script|style)[^>]*>.*?</(script|style)>", " ", raw, flags=re.DOTALL | re.IGNORECASE)
+        text = re.sub(r"<[^>]+>", " ", raw)
+        text = html_lib.unescape(text)
         text = re.sub(r"\s+", " ", text).strip()
         return text
     except Exception as exc:
@@ -119,13 +126,16 @@ def send_telegram(message: str) -> None:
         print("  ℹ️  Telegram not configured — skipping notification")
         return
     try:
-        requests.post(
+        resp = requests.post(
             f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            json={"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"},
+            json={"chat_id": CHAT_ID, "text": message, "parse_mode": "HTML"},
             timeout=10,
         )
+        resp.raise_for_status()
+    except requests.HTTPError as exc:
+        print(f"  ⚠️  Telegram send failed: HTTP {exc.response.status_code}")
     except Exception as exc:
-        print(f"  ⚠️  Telegram send failed: {exc}")
+        print(f"  ⚠️  Telegram send failed: {type(exc).__name__}")
 
 
 # ── Main loop ─────────────────────────────────────────────────────────────────
@@ -141,7 +151,7 @@ def run_check(states: list[str] | None = None) -> list[dict]:
     watch = WATCH_LIST
     if states:
         watch = [(s, sub, u) for s, sub, u in WATCH_LIST
-                 if any(f.lower() in s.lower() for f in states)]
+                 if any(f.lower() == s.lower() for f in states)]
 
     print(f"\n{'='*55}")
     print(f"  Compliance Monitor — {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}")
@@ -156,7 +166,7 @@ def run_check(states: list[str] | None = None) -> list[dict]:
 
         new_hash = content_hash(text)
         excerpt  = text[:400]
-        old_hash = get_last_hash(conn, url)
+        old_hash = get_last_hash(conn, url, state, subject)
 
         if old_hash is None:
             save_snapshot(conn, state, subject, url, new_hash, excerpt)
@@ -169,11 +179,11 @@ def run_check(states: list[str] | None = None) -> list[dict]:
             changes_found.append(change)
 
             msg = (
-                f"🚨 *Compliance Update Detected*\n\n"
-                f"*State:* {state}\n"
-                f"*Area:* {subject}\n"
-                f"*URL:* {url}\n\n"
-                f"_{excerpt[:300]}..._"
+                f"🚨 <b>Compliance Update Detected</b>\n\n"
+                f"<b>State:</b> {html_lib.escape(state)}\n"
+                f"<b>Area:</b> {html_lib.escape(subject)}\n"
+                f"<b>URL:</b> {html_lib.escape(url)}\n\n"
+                f"<i>{html_lib.escape(excerpt[:300])}...</i>"
             )
             send_telegram(msg)
         else:

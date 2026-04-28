@@ -14,4 +14,4 @@ ENV PYTHONUNBUFFERED=1
 ENV DB_PATH=/data/compliance.db
 
 WORKDIR /app/src
-CMD ["python", "monitor.py"]
+CMD ["python", "agent.py"]

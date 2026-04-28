@@ -36,3 +36,5 @@ data/*.db-wal
 .claude/
 
 CLAUDE.md
+
+custom-claw/.env

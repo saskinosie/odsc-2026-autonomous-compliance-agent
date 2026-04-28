@@ -14,7 +14,7 @@ The agent autonomously hunts for changes to educator certification requirements 
 | - SQLite snapshots   |        | - Web dashboard           |
 | - Telegram alerts    |        | - 50+ skills              |
 +----------------------+        +-------------+-------------+
-       Part 2-3                        Part 4-5
+     Notebook 1                      Notebook 2
   "Build it yourself"             "Use a framework"
                   ↓                       ↓
           +---------------------------------------+
@@ -70,12 +70,19 @@ Open `.env` and fill in your keys:
 OPENAI_API_KEY=your-openai-api-key
 BRAVE_API_KEY=your-brave-api-key
 
-# Optional — set up during the workshop
+# Optional — Custom Claw Telegram (Notebook 1)
+CUSTOM_CLAW_TELEGRAM_BOT_TOKEN=
+CUSTOM_CLAW_TELEGRAM_CHAT_ID=
+
+# Optional — OpenClaw Telegram (Notebook 2)
+OPENCLAW_TELEGRAM_BOT_TOKEN=
+
+# Optional — Opik observability (Notebook 2)
 OPIK_API_KEY=
 OPIK_WORKSPACE=
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
 ```
+
+The notebooks copy `.env` to each sub-project automatically.
 
 ### 3. Set up the Python environment
 
@@ -94,13 +101,13 @@ pip install -r requirements.txt
 sudo service docker start
 ```
 
-### 5. Open the notebook
+### 5. Open the notebooks
 
 ```bash
-jupyter lab agent_setup.ipynb
+jupyter lab custom_claw.ipynb
 ```
 
-Run through Parts 1–5 in order.
+Work through Notebook 1 (`custom_claw.ipynb`) first, then Notebook 2 (`openclaw.ipynb`).
 
 ---
 
@@ -108,7 +115,8 @@ Run through Parts 1–5 in order.
 
 | Notebook | What it covers |
 | --- | --- |
-| `agent_setup.ipynb` | Full workshop — Parts 1-5, Custom Claw through OpenClaw |
+| `custom_claw.ipynb` | Notebook 1 — build Custom Claw, add Brave Search, conversational agent |
+| `openclaw.ipynb` | Notebook 2 — OpenClaw framework, AGENTS.md, Telegram, Opik |
 | `opik_observability.ipynb` | Install Opik plugin, trace every agent turn |
 | `opik_evaluation.ipynb` | Batch LLM-as-a-judge evaluation of agent response quality |
 
@@ -188,9 +196,15 @@ Telegram alerts are optional but make for a compelling live demo.
 
 ### Step 3: Add to .env
 
+For **Custom Claw** (Notebook 1):
 ```env
-TELEGRAM_BOT_TOKEN=7123456789:AAF1234abcd...
-TELEGRAM_CHAT_ID=123456789
+CUSTOM_CLAW_TELEGRAM_BOT_TOKEN=7123456789:AAF1234abcd...
+CUSTOM_CLAW_TELEGRAM_CHAT_ID=123456789
+```
+
+For **OpenClaw** (Notebook 2):
+```env
+OPENCLAW_TELEGRAM_BOT_TOKEN=7123456789:AAF1234abcd...
 ```
 
 ---
