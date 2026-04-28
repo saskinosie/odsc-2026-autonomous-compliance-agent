@@ -2,21 +2,19 @@
 
 A hands-on workshop demonstrating how to build and deploy a secure autonomous agent that monitors teacher licensure and Praxis exam compliance requirements across US states and school districts.
 
-The agent autonomously hunts for changes to educator certification requirements — state DOE pages, Praxis exam requirements, endorsement rules — and sends a Telegram notification the moment something changes. Full traces captured in Opik for observability.
-
 ## Architecture
 
 ```
-+----------------------+        +---------------------------+
-| Custom Claw (Python) |        | OpenClaw (Framework)      |
-| - ~150 lines         |  →     | - Production agent        |
-| - Fetch + hash URLs  | evolve | - Scheduling built in     |
-| - SQLite snapshots   |        | - Web dashboard           |
-| - Telegram alerts    |        | - 50+ skills              |
-+----------------------+        +-------------+-------------+
-     Notebook 1                      Notebook 2
-  "Build it yourself"             "Use a framework"
-                  ↓                       ↓
++---------------------------+        +---------------------------+
+| Custom Claw (Notebook 1)  |        | OpenClaw (Notebook 2)     |
+| - pydantic-ai agent       |  →     | - Production framework    |
+| - Runs in Jupyter         | evolve | - Runs in Docker          |
+| - Fetch + hash URLs       |        | - Scheduling built in     |
+| - SQLite snapshots        |        | - Web dashboard           |
+| - Brave Search discovery  |        | - Telegram notifications  |
++---------------------------+        +---------------------------+
+   "Build it yourself"                  "Use a framework"
+                  ↓                            ↓
           +---------------------------------------+
           |           SQLite Database             |
           |  - Compliance URL snapshots           |
@@ -32,19 +30,24 @@ The agent autonomously hunts for changes to educator certification requirements 
 
 ## Prerequisites
 
-### Required
+### Required for both notebooks
 
 | Service | What it's for | Sign up | Free tier? |
 |---------|--------------|---------|------------|
-| **Docker Desktop** | Runs both agents in isolated containers | [docker.com](https://www.docker.com/products/docker-desktop/) | Yes |
-| **OpenAI** | Powers the OpenClaw agent reasoning | [platform.openai.com](https://platform.openai.com) | Credit required |
+| **OpenAI** | Powers agent reasoning | [platform.openai.com](https://platform.openai.com) | Credit required |
 | **Brave Search** | Web search skill for finding compliance pages | [brave.com/search/api](https://brave.com/search/api/) | Yes (2000 queries/month) |
+
+### Required for Notebook 2 only
+
+| Service | What it's for | Sign up | Free tier? |
+|---------|--------------|---------|------------|
+| **Docker Desktop** | Runs the OpenClaw agent | [docker.com](https://www.docker.com/products/docker-desktop/) | Yes |
 
 ### Optional
 
 | Service | What it's for | Sign up | Free tier? |
 |---------|--------------|---------|------------|
-| **Telegram** | Receive alerts on your phone | [telegram.org](https://telegram.org) | Yes |
+| **Telegram** | Receive alerts and chat with your agent | [telegram.org](https://telegram.org) | Yes |
 | **Opik** | Full agent observability and tracing | [comet.com/opik](https://www.comet.com/opik) | Yes |
 
 ---
@@ -70,10 +73,6 @@ Open `.env` and fill in your keys:
 OPENAI_API_KEY=your-openai-api-key
 BRAVE_API_KEY=your-brave-api-key
 
-# Optional — Custom Claw Telegram (Notebook 1)
-CUSTOM_CLAW_TELEGRAM_BOT_TOKEN=
-CUSTOM_CLAW_TELEGRAM_CHAT_ID=
-
 # Optional — OpenClaw Telegram (Notebook 2)
 OPENCLAW_TELEGRAM_BOT_TOKEN=
 
@@ -81,8 +80,6 @@ OPENCLAW_TELEGRAM_BOT_TOKEN=
 OPIK_API_KEY=
 OPIK_WORKSPACE=
 ```
-
-The notebooks copy `.env` to each sub-project automatically.
 
 ### 3. Set up the Python environment
 
@@ -92,22 +89,13 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Make sure Docker is running
-
-**On Docker Desktop (Mac/Windows):** Open Docker Desktop or confirm with `docker info`.
-
-**On Linux without Docker Desktop:** Start the daemon manually:
-```bash
-sudo service docker start
-```
-
-### 5. Open the notebooks
+### 4. Open the notebooks
 
 ```bash
-jupyter lab custom_claw.ipynb
+jupyter lab
 ```
 
-Work through Notebook 1 (`custom_claw.ipynb`) first, then Notebook 2 (`openclaw.ipynb`).
+Work through `1_custom_claw.ipynb` first, then `2_openclaw.ipynb`.
 
 ---
 
@@ -115,57 +103,50 @@ Work through Notebook 1 (`custom_claw.ipynb`) first, then Notebook 2 (`openclaw.
 
 | Notebook | What it covers |
 | --- | --- |
-| `custom_claw.ipynb` | Notebook 1 — build Custom Claw, add Brave Search, conversational agent |
-| `openclaw.ipynb` | Notebook 2 — OpenClaw framework, AGENTS.md, Telegram, Opik |
-| `opik_observability.ipynb` | Install Opik plugin, trace every agent turn |
-| `opik_evaluation.ipynb` | Batch LLM-as-a-judge evaluation of agent response quality |
+| `1_custom_claw.ipynb` | Build Custom Claw with pydantic-ai — fetch pages, detect changes, add Brave Search |
+| `2_openclaw.ipynb` | OpenClaw framework — AGENTS.md, Telegram pairing, Opik observability |
 
 ---
 
 ## Two Agent Versions
 
 ### Custom Claw — Build It Yourself
-~150 lines of Python in `custom-claw/src/monitor.py`. Fetches state DOE pages, hashes the content, diffs against SQLite snapshots, fires Telegram alerts. You can read every line and understand exactly what it does. No framework, no abstraction.
+
+A pydantic-ai agent in `custom-claw/src/agent.py`. Skills are plain Python functions decorated with `agent.tool_plain()`:
+
+- `fetch_compliance_page` — SSRF-safe page fetching with IP pinning
+- `check_for_change` — SHA-256 content hashing against SQLite snapshots
+- `discover_urls` — Brave Search to find compliance pages for any state
+
+You can read every line and understand exactly what it does. No scheduling, no persistence, no multi-channel support — run it from the notebook.
 
 ### OpenClaw — Use a Framework
-The [OpenClaw](https://github.com/openclaw/openclaw) agent framework running in Docker. Same core logic, but with persistent memory, a web dashboard, built-in scheduling, multi-channel support (Telegram, Discord, Slack, WhatsApp), and Opik observability. Skills are defined as Markdown files — the `check-compliance-updates` skill is the framework version of `monitor.py`.
+
+The [OpenClaw](https://github.com/openclaw/openclaw) agent framework running in Docker. Same core compliance logic, but with persistent memory, a web dashboard, Telegram support, and Opik observability built in. Skills are defined as Markdown + shell scripts — no Python required.
 
 ---
 
-## Docker Commands
-
-### Custom Claw
-
-```bash
-# Build
-docker compose -f custom-claw/docker-compose.yml build
-
-# Run a full compliance check
-docker compose -f custom-claw/docker-compose.yml run --rm custom-claw
-
-# Check a specific state
-docker compose -f custom-claw/docker-compose.yml run --rm custom-claw python monitor.py Ohio
-
-# Watch logs
-docker compose -f custom-claw/docker-compose.yml logs -f
-```
-
-### OpenClaw
+## OpenClaw CLI Reference
 
 ```bash
 # Start the gateway
 docker compose -f openclaw-agent/docker-compose.yml up -d openclaw-gateway
 
-# Check gateway health
-docker compose -f openclaw-agent/docker-compose.yml exec openclaw-gateway curl -sf http://localhost:18789/healthz
-
-# Send the agent a message
+# Run a compliance check
 docker compose -f openclaw-agent/docker-compose.yml exec openclaw-gateway \
-  node /app/openclaw.mjs agent -m "Check for compliance updates in Texas"
+  node /app/openclaw.mjs agent --agent main -m "Check for compliance updates in Texas"
 
-# Open the web dashboard
+# Check channel status
 docker compose -f openclaw-agent/docker-compose.yml exec openclaw-gateway \
-  node /app/openclaw.mjs dashboard --no-open
+  node /app/openclaw.mjs channels status
+
+# Approve a Telegram pairing request
+docker compose -f openclaw-agent/docker-compose.yml exec openclaw-gateway \
+  node /app/openclaw.mjs pairing approve telegram <CODE>
+
+# Check Opik plugin status
+docker compose -f openclaw-agent/docker-compose.yml exec openclaw-gateway \
+  node /app/openclaw.mjs opik status
 
 # Stop everything
 docker compose -f openclaw-agent/docker-compose.yml down
@@ -173,39 +154,14 @@ docker compose -f openclaw-agent/docker-compose.yml down
 
 ---
 
-## Telegram Setup
+## Telegram Setup (Notebook 2)
 
-Telegram alerts are optional but make for a compelling live demo.
-
-### Step 1: Create a bot
-
-1. Open Telegram and search for **@BotFather**
-2. Send `/newbot`
-3. Choose a display name (e.g. "Compliance Alert Bot")
-4. Choose a username ending in `bot` (e.g. `my_compliance_bot`)
-5. BotFather replies with your **HTTP API token** — copy it
-
-### Step 2: Get your chat ID
-
-1. Send your new bot any message (e.g. "hello")
-2. Open this URL in your browser (replace `<TOKEN>` with your token):
+1. Open Telegram and search for **@BotFather** → send `/newbot` → follow the prompts → copy the token
+2. Add to `.env`:
+   ```env
+   OPENCLAW_TELEGRAM_BOT_TOKEN=your-token
    ```
-   https://api.telegram.org/bot<TOKEN>/getUpdates
-   ```
-3. In the JSON, find `"chat":{"id":123456789}` — that number is your chat ID
-
-### Step 3: Add to .env
-
-For **Custom Claw** (Notebook 1):
-```env
-CUSTOM_CLAW_TELEGRAM_BOT_TOKEN=7123456789:AAF1234abcd...
-CUSTOM_CLAW_TELEGRAM_CHAT_ID=123456789
-```
-
-For **OpenClaw** (Notebook 2):
-```env
-OPENCLAW_TELEGRAM_BOT_TOKEN=7123456789:AAF1234abcd...
-```
+3. Run the Telegram cells in Notebook 2 — the first cell registers your bot, the second approves the pairing code your bot sends back
 
 ---
 
@@ -213,31 +169,31 @@ OPENCLAW_TELEGRAM_BOT_TOKEN=7123456789:AAF1234abcd...
 
 ```
 odsc-2026-autonomous-compliance-agent/
-├── agent_setup.ipynb                   # Main workshop notebook (Parts 1-5)
-├── opik_observability.ipynb            # Opik plugin setup and tracing
-├── opik_evaluation.ipynb               # LLM-as-a-judge batch evaluation
-├── requirements.txt                    # Python dependencies
-├── example.env                         # API key template (safe to commit)
-├── .env                                # Your actual keys (git-ignored)
-├── AGENTS.md                           # Agent context and domain knowledge
+├── 1_custom_claw.ipynb             # Notebook 1 — pydantic-ai agent
+├── 2_openclaw.ipynb                # Notebook 2 — OpenClaw framework
+├── AGENTS.md                       # Agent domain knowledge for OpenClaw
+├── requirements.txt                # Python dependencies
+├── example.env                     # API key template (safe to commit)
+├── .env                            # Your actual keys (git-ignored)
 │
-├── custom-claw/                        # "Build it yourself" — Parts 2-3
-│   ├── src/
-│   │   ├── monitor.py                  # Core logic: fetch, hash, diff, alert
-│   │   └── compliance_urls.py          # URLs to monitor
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── requirements.txt
+├── custom-claw/                    # Custom Claw source
+│   └── src/
+│       ├── agent.py                # pydantic-ai agent + skill registration
+│       ├── compliance_urls.py      # URLs to monitor
+│       └── skills/
+│           ├── fetch_page.py       # SSRF-safe page fetcher
+│           ├── check_change.py     # SQLite snapshot diff
+│           └── discover_urls.py    # Brave Search URL discovery
 │
-├── openclaw-agent/                     # "Use a framework" — Parts 4-5
+├── openclaw-agent/                 # OpenClaw framework
 │   ├── skills/
-│   │   ├── brave-search/               # Web search skill
-│   │   └── check-compliance-updates/  # Compliance monitoring skill
+│   │   ├── brave-search/           # Web search skill (SKILL.md + script)
+│   │   └── check-compliance-updates/ # Compliance monitoring skill
 │   ├── docker-compose.yml
-│   └── config/                         # Gateway config (git-ignored)
+│   └── config/                     # Gateway config + Opik plugin (git-ignored)
 │
-└── data/                               # SQLite database (git-ignored)
-    └── compliance.db                   # Snapshots and change history
+└── data/                           # SQLite database (git-ignored)
+    └── compliance.db
 ```
 
 ---
@@ -246,12 +202,12 @@ odsc-2026-autonomous-compliance-agent/
 
 | Problem | Fix |
 |---------|-----|
-| `docker: permission denied` | Prefix commands with `sudo`, or add your user to the docker group: `sudo usermod -aG docker $USER` |
-| Custom Claw shows no changes | First run captures baselines — changes appear on subsequent runs when a page updates |
-| `429` from Brave Search | Free tier is 1 req/sec. The agent has built-in delays but back off and retry if you hit the limit |
-| OpenClaw gateway stuck at "pairing required" | Run `docker compose --profile cli run --rm openclaw-cli node /app/openclaw.mjs devices list` then `devices approve <id>` |
-| Telegram message not received | Send your bot a message first (it can't initiate), then confirm your chat ID is correct |
-| OpenClaw config reset after restart | Config lives in `openclaw-agent/config/` (git-ignored). Don't delete this directory between sessions |
+| `docker: permission denied` | Add your user to the docker group: `sudo usermod -aG docker $USER` |
+| Custom Claw shows no changes | First run captures baselines — changes appear on subsequent runs |
+| `429` from Brave Search | Rate limit hit — wait a moment and retry |
+| OpenClaw not responding on Telegram | Run `channels status` to verify the bot is polling; re-run the `channels add` cell if needed |
+| Telegram pairing code not appearing | Make sure you sent your bot a message first — it replies with the code |
+| Opik traces not appearing | Run `opik status` and check the project name is `compliance-agent` in workspace `your-username` |
 
 ---
 
@@ -260,6 +216,7 @@ odsc-2026-autonomous-compliance-agent/
 | Resource | Link |
 |----------|------|
 | OpenClaw | https://github.com/openclaw/openclaw |
+| opik-openclaw plugin | https://github.com/comet-ml/opik-openclaw |
 | Opik | https://www.comet.com/opik |
 | Brave Search API | https://brave.com/search/api/ |
 | ETS Praxis State Requirements | https://www.ets.org/praxis/states.html |

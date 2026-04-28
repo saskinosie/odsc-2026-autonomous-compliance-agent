@@ -39,5 +39,6 @@ custom-claw/*.db-wal
 .claude/
 
 CLAUDE.md
+audit.sh
 
 custom-claw/.env
