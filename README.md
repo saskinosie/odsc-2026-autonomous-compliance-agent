@@ -1,9 +1,14 @@
 # ODSC 2026: Deploying a Secure Autonomous Agent
 
-A hands-on workshop demonstrating how to build and deploy a secure autonomous agent that monitors teacher licensure and Praxis exam compliance requirements across US states and school districts.
+A hands-on workshop demonstrating how to build and deploy a secure autonomous agent that monitors teacher licensure and Praxis exam compliance requirements across US states and school districts. Univeristies in the US must train teachres, but tyeaching licensure comliance varies from state to state and individual school requirements can vary between school districts. For licensure compliance there is no central notification system when thins change making tracking highly disconnected and significant administrative burden. 
+
+What do we do? Throw all of our resources at the problem?
+
+NO, we build an agent to handle the heavy lifting for us!
 
 ## Architecture
 
+We will build and juxtapose two diffferent methods of autonomous agents, a Principle of Least Privilege (PoLP) "Custom Claw" agent Vs full blown Open Claw (in a Docket container with full visibilty for security)
 ```
 +---------------------------+        +---------------------------+
 | Custom Claw (Notebook 1)  |        | OpenClaw (Notebook 2)     |
@@ -103,8 +108,8 @@ Work through `1_custom_claw.ipynb` first, then `2_openclaw.ipynb`.
 
 | Notebook | What it covers |
 | --- | --- |
-| `1_custom_claw.ipynb` | Build Custom Claw with pydantic-ai — fetch pages, detect changes, add Brave Search |
-| `2_openclaw.ipynb` | OpenClaw framework — AGENTS.md, Telegram pairing, Opik observability |
+| `1_custom_claw.ipynb` | Build Custom Claw with pydantic-ai— fetch pages, detect changes, add Brave Search |
+| `2_openclaw.ipynb` | OpenClaw framework— AGENTS.md, Telegram pairing, Opik observability |
 
 ---
 
@@ -118,11 +123,11 @@ A pydantic-ai agent in `custom-claw/src/agent.py`. Skills are plain Python funct
 - `check_for_change` — SHA-256 content hashing against SQLite snapshots
 - `discover_urls` — Brave Search to find compliance pages for any state
 
-You can read every line and understand exactly what it does. No scheduling, no persistence, no multi-channel support — run it from the notebook.
+You can read every line and understand exactly what it does.  Scheduled compliance checks, no persistence, no multi-channel support. It runs exclusively from the notebook.
 
 ### OpenClaw — Use a Framework
 
-The [OpenClaw](https://github.com/openclaw/openclaw) agent framework running in Docker. Same core compliance logic, but with persistent memory, a web dashboard, Telegram support, and Opik observability built in. Skills are defined as Markdown + shell scripts — no Python required.
+The [OpenClaw](https://github.com/openclaw/openclaw) agent framework running in Docker. Same core compliance logic, but with persistent memory, a web dashboard, Telegram support, and Opik observability built in. Skills are defined as Markdown + shell scripts, no Python required.
 
 ---
 
