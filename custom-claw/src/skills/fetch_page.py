@@ -113,14 +113,14 @@ def fetch_compliance_page(url: str) -> str:
     """Fetch a compliance page and return cleaned plain text for the LLM.
 
     Pins the TCP connection to the DNS-resolved IP to prevent rebinding attacks.
-    Raises ValueError for disallowed URLs, RuntimeError on fetch failure.
+    Returns an error string on failure so the agent can continue with other URLs.
     """
     current_url = url
     for _ in range(MAX_REDIRECTS + 1):
         try:
             body, charset, location = _fetch_one(current_url)
-        except (urllib3.exceptions.HTTPError, OSError) as exc:
-            raise RuntimeError(f"Failed to fetch {current_url}: {exc}") from exc
+        except (RuntimeError, urllib3.exceptions.HTTPError, OSError) as exc:
+            return f"[fetch error] Could not retrieve {current_url}: {exc}"
 
         if location:
             current_url = urljoin(current_url, location)

@@ -8,7 +8,7 @@ Add or remove entries here to control what the agent watches.
 WATCH_LIST = [
     # State DOE licensure landing pages
     ("Ohio",          "General Licensure", "https://education.ohio.gov/Topics/Teaching/Licensure"),
-    ("Texas",         "General Licensure", "https://tea.texas.gov/texas-educators/certification/educator-certification"),
+    ("Texas",         "General Licensure", "https://tea.texas.gov/texas-educators/certification"),
     ("California",    "General Licensure", "https://www.ctc.ca.gov/educator-prep/program-accred/accreditation-overview"),
     ("Florida",       "General Licensure", "https://www.fldoe.org/teaching/certification/"),
     ("New York",      "General Licensure", "https://www.nysed.gov/teaching-certification"),

@@ -3,7 +3,7 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 
-DB_PATH = os.getenv("DB_PATH", "/data/compliance.db")
+DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "..", "..", "compliance.db"))
 
 
 def _init_db(path: str) -> sqlite3.Connection:

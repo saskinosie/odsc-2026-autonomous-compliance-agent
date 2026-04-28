@@ -31,6 +31,9 @@ openclaw-agent/.env
 data/*.db
 data/*.db-shm
 data/*.db-wal
+custom-claw/*.db
+custom-claw/*.db-shm
+custom-claw/*.db-wal
 
 # Claude
 .claude/

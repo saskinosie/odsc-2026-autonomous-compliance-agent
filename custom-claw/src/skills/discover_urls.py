@@ -16,7 +16,7 @@ def discover_urls(state: str, max_results: int = 3) -> list[str]:
         resp = requests.get(
             "https://api.search.brave.com/res/v1/web/search",
             headers={"Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY},
-            params={"q": f"{state} teacher licensure certification requirements site:.gov", "count": max_results},
+            params={"q": f"{state} department of education teacher licensure certification requirements", "count": max_results},
             timeout=10,
         )
         resp.raise_for_status()

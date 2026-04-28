@@ -1,9 +1,0 @@
-services:
-  custom-claw:
-    build: .
-    env_file: ../.env
-    volumes:
-      - ../data:/data
-    environment:
-      - DB_PATH=/data/compliance.db
-      - PYTHONUNBUFFERED=1
