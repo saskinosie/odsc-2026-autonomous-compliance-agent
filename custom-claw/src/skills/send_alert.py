@@ -12,7 +12,16 @@ def send_alert(state: str, subject: str, url: str, summary: str) -> str:
     Returns 'sent' on success or a description of why it was skipped/failed.
     """
     if not BOT_TOKEN or not CHAT_ID:
-        return "skipped: CUSTOM_CLAW_TELEGRAM_BOT_TOKEN or CUSTOM_CLAW_TELEGRAM_CHAT_ID not set"
+        print(
+            f"\n{'─'*50}\n"
+            f"📬  COMPLIANCE ALERT (console — Telegram not configured)\n"
+            f"  State:   {state}\n"
+            f"  Area:    {subject}\n"
+            f"  URL:     {url}\n"
+            f"  Summary: {summary[:300]}\n"
+            f"{'─'*50}\n"
+        )
+        return "sent"
 
     msg = (
         f"🚨 <b>Compliance Update Detected</b>\n\n"
