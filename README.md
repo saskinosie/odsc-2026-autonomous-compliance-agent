@@ -6,6 +6,7 @@ What do we do? Throw all of our resources at the problem?
 
 NO, we build an agent to handle the heavy lifting for us!
 
+
 ## Architecture
 
 We will build and juxtapose two diffferent methods of autonomous agents, a Principle of Least Privilege (PoLP) "Custom Claw" agent Vs full blown Open Claw (in a Docket container with full visibilty for security)
